@@ -12,17 +12,14 @@ class MyTCPServer(socketserver.TCPServer):
 
 class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler):
 
-	def __init__(self, request, client_address, server, tclass = response.ResponseHandler):
-		self.tclass = tclass
-		response.ResponseHandler.__init__(self, request)
+	def __init__(self, request, client_address, server):
 		socketserver.BaseRequestHandler.__init__(self, request, client_address, server)
 		
 
 	def handle(self):
-		# while True:
 		data = self.request.recv(1024)
 		print(data)
-		self.tclass.MASTERHANDLER(self)
+		response.ResponseHandler(self.request)
 		# self.request.sendall(bytes('damn it', 'utf-8'))
 
 

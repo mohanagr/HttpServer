@@ -1,4 +1,5 @@
 from email.utils import formatdate
+import socket
 
 class ResponseHandler():
 
@@ -13,6 +14,7 @@ class ResponseHandler():
 		#print("IN YOUR SUCKING CLASSES CTOR")
 		self.body = '<html><body><h1>Oh my god</h1></body></html>'
 		
+		self.MasterHandler()
 		#self.destination = requestSocket
 
 	def SetHeader(self, key, val):
@@ -42,7 +44,7 @@ class ResponseHandler():
 
 	# def FillErrorTemplate():
 
-	def MASTERHANDLER(self):
+	def MasterHandler(self):
 		
 		self.StatusCode = '200'
 
