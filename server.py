@@ -19,7 +19,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler
 	def handle(self):
 		data = self.request.recv(1024)
 		print(data)
-		response.ResponseHandler(self.request)
+		response.ResponseHandler(self.request, data)
 		# self.request.sendall(bytes('damn it', 'utf-8'))
 
 
