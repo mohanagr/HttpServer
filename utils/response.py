@@ -1,6 +1,7 @@
 from email.utils import formatdate
 from urllib import parse
 import mimetypes
+import os
 import socket
 
 class ResponseHandler():
@@ -48,33 +49,33 @@ class ResponseHandler():
 		self.RequestAttr['method'] = request_line[0]
 		self.RequestAttr['abs_path'] = request_line[1]
 
-		PathAttr = parse.urlparse(self.RequestAttr['path'])
+		PathAttr = parse.urlparse(self.RequestAttr['abs_path'])
 
 		BaseDir = "/home/mohan/projects/Mysite"
 
 		self.RequestAttr['rel_path'] = PathAttr.path
 
-		filepath = BaseDir + self.RequestAttr['rel_path']
+		self.filepath = BaseDir + self.RequestAttr['rel_path']
 
-		f = open(filepath, mode = 'rb')
 
-		self.body = f.read()
+	def ValidateRequest(self):
 
-		f.close()
+		if self.RequestAttr['method'] not in self.SupportedMethods.keys():
+			self.send_error('400')
+			return False
 
-	def ValidateRequest(self)
-		
+		# Possbile to add other options to validate requests here
+		# Eg. based on 'Referer' or 'User-Agent' headers etc.
 
-	# def FillErrorTemplate():
+		return True
 
-	def MasterHandler(self, data):
-		
-		self.ParseRequest(data)
 
-		self.StatusCode = '200'
 
+	def send_error(self, errorcode):
+
+		self.StatusCode = errorcode
 		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
-		self.SetHeader('Content-Type', mimetypes.guess_type(self.RequestAttr['path'])[0])
+		self.SetHeader('Content-Type', 'text/html')
 		self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
 
 		self.FillResponseLineTemplate()
@@ -84,6 +85,63 @@ class ResponseHandler():
 		self.SendHeaders()
 		self.EndHeaders()
 		self.SendBody()
+
+	def send_response(self, status):
+
+		self.StatusCode = status
+		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
+		
+		self.FillResponseLineTemplate()
+
+		self.SendResponseLine()	
+
+	# def FillErrorTemplate():
+
+	def respond(self):
+
+		try:
+			f = open(self.filepath, 'rb')
+		except IOError:
+			self.send_error('404')
+			return None
+
+		fd = os.fstat(f.fileno())
+
+		self.SetHeader('Content-Type', mimetypes.guess_type(self.RequestAttr['abs_path'])[0])
+		self.SetHeader("Content-Length", str(fd[6]))
+		self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
+
+		self.FillHeaderTemplate()
+
+		self.send_response('200')
+		self.SendHeaders()
+		self.EndHeaders()
+
+		return f
+
+	def do_GET(self):
+
+		fobj = self.respond()
+
+		if fobj:
+			self.body = fobj.read()
+			self.SendBody()
+			fobj.close()
+
+	def do_HEAD():
+		pass
+
+	SupportedMethods = {'GET' : do_GET, 'HEAD': do_HEAD}
+
+	def MasterHandler(self, data):
+		
+		self.ParseRequest(data)
+
+		if self.ValidateRequest():
+		
+			self.SupportedMethods[self.RequestAttr['method']](self)
+
+
 
 
 

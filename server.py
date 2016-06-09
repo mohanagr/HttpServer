@@ -20,9 +20,6 @@ class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler
 		data = self.request.recv(1024)
 		print(data)
 		response.ResponseHandler(self.request, data)
-		# self.request.sendall(bytes('damn it', 'utf-8'))
-
-
 
 if __name__ == "__main__":
 	
