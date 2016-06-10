@@ -12,6 +12,7 @@ class ResponseHandler():
 		self.request =  request
 		self.HeaderTemplate = ''
 		self.ResponseLineTemplate = ''
+		self.Body = b''
 		self.HeaderDict = {}
 		self.RequestAttr = {}
 
@@ -41,7 +42,7 @@ class ResponseHandler():
 
 	def ParseRequest(self, data):
 		data = data.decode('utf-8')
-		#print(data)
+
 		fragments = data.split('\r\n')
 
 		request_line = fragments[0].split(' ')    # GET /some/path HTTP/1.1
@@ -70,7 +71,6 @@ class ResponseHandler():
 		return True
 
 
-
 	def send_error(self, errorcode):
 
 		self.StatusCode = errorcode
@@ -89,8 +89,7 @@ class ResponseHandler():
 	def send_response(self, status):
 
 		self.StatusCode = status
-		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
-		
+
 		self.FillResponseLineTemplate()
 
 		self.SendResponseLine()	
@@ -110,6 +109,7 @@ class ResponseHandler():
 		self.SetHeader('Content-Type', mimetypes.guess_type(self.RequestAttr['abs_path'])[0])
 		self.SetHeader("Content-Length", str(fd[6]))
 		self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
+		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
 
 		self.FillHeaderTemplate()
 
