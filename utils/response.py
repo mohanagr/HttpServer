@@ -11,15 +11,17 @@ class ResponseHandler():
 
 	ErrorTemplate = Template('\
 	<html>\
-	<title>$err </title> \
+	<title>$err </title>\
 	<h1> Oops! Looks like something went wrong. <br> </h1>\
 	<h2> Error $err  $message </h2>\
 	</html>')
-	def __init__(self, request, data):
+
+	def __init__(self, request, data, directory):
 		self.request =  request
 		self.HeaderTemplate = ''
 		self.ResponseLineTemplate = ''
 		self.Body = b''
+		self.BaseDir = directory
 		self.HeaderDict = {}
 		self.RequestAttr = {}
 
@@ -59,11 +61,9 @@ class ResponseHandler():
 
 		PathAttr = parse.urlparse(self.RequestAttr['abs_path'])
 
-		BaseDir = "/home/mohan/projects/Mysite"
-
 		self.RequestAttr['rel_path'] = PathAttr.path
 
-		self.filepath = BaseDir + self.RequestAttr['rel_path']
+		self.filepath = self.BaseDir + self.RequestAttr['rel_path']
 
 
 	def ValidateRequest(self):
@@ -88,6 +88,7 @@ class ResponseHandler():
 		self.FillResponseLineTemplate()
 		self.FillHeaderTemplate()
 		self.body = bytes(self.ErrorTemplate.substitute(err = errorcode, message = self.StatusMapping[errorcode]), 'utf-8')
+		
 		self.SendResponseLine()
 		self.SendHeaders()
 		self.EndHeaders()
@@ -101,7 +102,6 @@ class ResponseHandler():
 
 		self.SendResponseLine()	
 
-	# def FillErrorTemplate():
 
 	def respond(self):
 
@@ -136,7 +136,10 @@ class ResponseHandler():
 			fobj.close()
 
 	def do_HEAD():
-		pass
+		fobj = self.respond()
+
+		if fobj:
+			fobj.close()
 
 	SupportedMethods = {'GET' : do_GET, 'HEAD': do_HEAD}
 
