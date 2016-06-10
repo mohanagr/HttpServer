@@ -1,5 +1,6 @@
 from email.utils import formatdate
 from urllib import parse
+from string import Template
 import mimetypes
 import os
 import socket
@@ -7,7 +8,13 @@ import socket
 class ResponseHandler():
 
 	StatusMapping = {'404' : 'Not Found', '400' : 'Bad Request', '200' : 'OK'}
-	
+
+	ErrorTemplate = Template('\
+	<html>\
+	<title>$err </title> \
+	<h1> Oops! Looks like something went wrong. <br> </h1>\
+	<h2> Error $err  $message </h2>\
+	</html>')
 	def __init__(self, request, data):
 		self.request =  request
 		self.HeaderTemplate = ''
@@ -80,7 +87,7 @@ class ResponseHandler():
 
 		self.FillResponseLineTemplate()
 		self.FillHeaderTemplate()
-
+		self.body = bytes(self.ErrorTemplate.substitute(err = errorcode, message = self.StatusMapping[errorcode]), 'utf-8')
 		self.SendResponseLine()
 		self.SendHeaders()
 		self.EndHeaders()
@@ -107,7 +114,7 @@ class ResponseHandler():
 		fd = os.fstat(f.fileno())
 
 		self.SetHeader('Content-Type', mimetypes.guess_type(self.RequestAttr['abs_path'])[0])
-		self.SetHeader("Content-Length", str(fd[6]))
+		self.SetHeader('Content-Length', str(fd[6]))
 		self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
 		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
 
