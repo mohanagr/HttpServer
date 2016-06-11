@@ -5,6 +5,7 @@ import socket
 import sys
 import argparse
 import os.path
+import time
 from utils import response
 
 parser = argparse.ArgumentParser(description='Start the HTTP server with custom port and base directory.')
@@ -31,8 +32,27 @@ class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler
 		
 
 	def handle(self):
-		data = self.request.recv(1024)
-		print(data.decode('utf-8'))
+
+		self.request.settimeout(0.1) # Because recv() is blocking
+		data = b''
+		while True:
+			try:
+				msg = self.request.recv(1024)
+			except socket.timeout as e:
+				err = e.args[0]
+				print(err)
+				break
+			except socket.error as e:
+				# Something else happened
+				print (e)
+				sys.exit(1)
+			else:
+				if len(msg) == 0:
+					print ('No request received')
+					sys.exit(0)
+				else:
+					data = data + msg
+		print(data)
 		response.ResponseHandler(self.request, data, args.dir)
 
 

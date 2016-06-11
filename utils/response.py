@@ -23,7 +23,6 @@ class ResponseHandler():
 		self.ResponseLineTemplate = ''
 		self.Body = b''
 		self.BaseDir = directory
-		self.RequestAttr = Namespace()
 
 		self.MasterHandler(data)
 
@@ -45,10 +44,19 @@ class ResponseHandler():
 
 	def ParseRequest(self, data):
 		data = data.decode('utf-8')
-
+		
+		if not data:
+			print('No data receieved')
+			return False
+		
 		fragments = data.split('\r\n')
-		fragments = list(filter(None, fragments)) #Remove empty '' entries at the end
 
+		if not fragments:
+			return False
+
+		fragments = list(filter(None, fragments)) #Remove empty '' entries at the end
+		print("fragments are", fragments)
+		
 		request_line = fragments[0].split(' ')    # GET /some/path HTTP/1.1
 		
 		headers = {}
@@ -144,9 +152,10 @@ class ResponseHandler():
 			return None
 
 		fd = os.fstat(f.fileno())
-
+		ctype = mimetypes.guess_type(self.filepath)[0]
 		self.send_response('200')
-		self.SendHeader('Content-Type', mimetypes.guess_type(self.filepath)[0])
+		if ctype:
+			self.SendHeader('Content-Type', ctype)
 		self.SendHeader('Content-Length', str(fd[6]))
 		self.SendHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
 		self.SendHeader('Server', 'Python/0.1.0 (Custom)')
