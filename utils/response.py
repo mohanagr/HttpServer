@@ -17,8 +17,9 @@ class ResponseHandler():
 	<h2> Error $err  $message </h2>\
 	</html>')
 
-	def __init__(self, data, directory):
+	def __init__(self, request, data, directory):
 
+		self.request = request
 		self.ResponseLineTemplate = ''
 		self.Body = b''
 		self.BaseDir = directory

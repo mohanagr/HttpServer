@@ -11,7 +11,10 @@ HTTP server that serves static webpages. Meant as a learning exercise.
 | `-d`, `--dir`    | Directory in which requested resources will be looked for. Defaults to this repo.|
 | `-h`, `--help`   | Show help and exit.                                                              |
 
+* Test it using any web browser - `http://127.0.0.1:[PORT]`
 * Care should be taken if no port is specified. It is possible some other service might be using HTTP port 80 (eg. Apache)
 
 ## Features
 * Supports `GET` and `HEAD` requests
+* Implements look up for `index.html` / `index.htm` in a directory
+
