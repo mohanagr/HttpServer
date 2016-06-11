@@ -18,7 +18,6 @@ class ResponseHandler():
 
 	def __init__(self, request, data, directory):
 		self.request =  request
-		self.HeaderTemplate = ''
 		self.ResponseLineTemplate = ''
 		self.Body = b''
 		self.BaseDir = directory
@@ -27,18 +26,12 @@ class ResponseHandler():
 
 		self.MasterHandler(data)
 
-	def SetHeader(self, key, val):
-		self.HeaderDict[key] = val
-
-	def FillHeaderTemplate(self):
-		for key, val in self.HeaderDict.items():
-			self.HeaderTemplate = self.HeaderTemplate + key + ' : ' + val + '\r\n'
-
 	def FillResponseLineTemplate(self):
 		self.ResponseLineTemplate = 'HTTP/1.1 ' + self.StatusCode + ' ' + self.StatusMapping[self.StatusCode] + '\r\n'
 
-	def SendHeaders(self):
-		self.request.sendall(bytes(self.HeaderTemplate, 'utf-8'))
+	def SendHeader(self, key, val):
+		header = key + ' : ' + val + '\r\n'
+		self.request.sendall(bytes(header, 'utf-8'))
 
 	def EndHeaders(self):
 		self.request.sendall(bytes('\r\n', 'utf-8'))
@@ -82,18 +75,15 @@ class ResponseHandler():
 
 	def send_error(self, errorcode):
 
-		self.StatusCode = errorcode
-		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
-		self.SetHeader('Content-Type', 'text/html')
-		self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
-
-		self.FillResponseLineTemplate()
-		self.FillHeaderTemplate()
 		self.body = bytes(self.ErrorTemplate.substitute(err = errorcode, message = self.StatusMapping[errorcode]), 'utf-8')
 		
-		self.SendResponseLine()
-		self.SendHeaders()
+		self.send_response(errorcode)
+
+		self.SendHeader('Server', 'Python/0.1.0 (Custom)')
+		self.SendHeader('Content-Type', 'text/html')
+		self.SendHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
 		self.EndHeaders()
+
 		self.SendBody()
 
 	def send_response(self, status):
@@ -111,10 +101,8 @@ class ResponseHandler():
 
 			if not self.filepath.endswith('/'):
 
-				self.SetHeader("Location", self.RequestAttr['rel_path'] + "/")
-				self.FillHeaderTemplate()
 				self.send_response('301')
-				self.SendHeaders()
+				self.SendHeader("Location", self.RequestAttr['rel_path'] + "/")
 				self.EndHeaders()
 				return False
 
@@ -127,16 +115,13 @@ class ResponseHandler():
 			else:
 
 				self.body = bytes('<html><title>Sorry!</title><h2>Sorry! The server doesn\'t serve directories.</h2></html>', 'utf-8')
-				self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
-				self.SetHeader('Server', 'Python/0.1.0 (Custom)')
-				self.FillHeaderTemplate()
-
 				self.send_response('200')
-				self.SendHeaders()
+				self.SendHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
+				self.SendHeader('Server', 'Python/0.1.0 (Custom)')
 				self.EndHeaders()
 				self.SendBody()
 				return False
-				
+
 		try:
 			f = open(self.filepath, 'rb')
 		except IOError:
@@ -145,15 +130,11 @@ class ResponseHandler():
 
 		fd = os.fstat(f.fileno())
 
-		self.SetHeader('Content-Type', mimetypes.guess_type(self.filepath)[0])
-		self.SetHeader('Content-Length', str(fd[6]))
-		self.SetHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
-		self.SetHeader('Server', 'Python/0.1.0 (Custom)')
-
-		self.FillHeaderTemplate()
-
 		self.send_response('200')
-		self.SendHeaders()
+		self.SendHeader('Content-Type', mimetypes.guess_type(self.filepath)[0])
+		self.SendHeader('Content-Length', str(fd[6]))
+		self.SendHeader('Date', formatdate(timeval=None, localtime=False, usegmt=True))
+		self.SendHeader('Server', 'Python/0.1.0 (Custom)')
 		self.EndHeaders()
 
 		return f
