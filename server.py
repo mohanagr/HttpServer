@@ -9,7 +9,7 @@ from utils import response
 
 parser = argparse.ArgumentParser(description='Start the HTTP server with custom port and base directory.')
 
-parser.add_argument('-d', dest='dir', default=os.path.dirname(__file__),
+parser.add_argument('-d', '--dir', dest='dir', default=os.path.dirname(__file__),
 	help='The base directory where the requested resources will be looked for. Defaults to current directory.')
 parser.add_argument('-p', '--port', dest='port', default=80, type = int,
 	help='The port where the server will listen. Defaults to HTTP port 80')
