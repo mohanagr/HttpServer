@@ -1,6 +1,7 @@
 from email.utils import formatdate
 from urllib import parse
 from string import Template
+from argparse import Namespace
 import mimetypes
 import os
 import socket
@@ -16,13 +17,12 @@ class ResponseHandler():
 	<h2> Error $err  $message </h2>\
 	</html>')
 
-	def __init__(self, request, data, directory):
-		self.request =  request
+	def __init__(self, data, directory):
+
 		self.ResponseLineTemplate = ''
 		self.Body = b''
 		self.BaseDir = directory
-		self.HeaderDict = {}
-		self.RequestAttr = {}
+		self.RequestAttr = Namespace()
 
 		self.MasterHandler(data)
 
@@ -46,24 +46,38 @@ class ResponseHandler():
 		data = data.decode('utf-8')
 
 		fragments = data.split('\r\n')
+		fragments = list(filter(None, fragments)) #Remove empty '' entries at the end
 
 		request_line = fragments[0].split(' ')    # GET /some/path HTTP/1.1
+		
+		headers = {}
 
-		self.RequestAttr['method'] = request_line[0]
+		for i in range(1, len(fragments)):
+			key, val = fragments[i].split(':', 1)
+			key = key.strip()
+			val = val.strip()
+			headers[key] = val
 
+		mthd = request_line[0]
+		
 		# User can send absolute url as path eg. http://domain.com/path 
-		self.RequestAttr['abs_path'] = request_line[1]
+		abspth = request_line[1]
+		PathAttr = parse.urlparse(abspth)
+		relpth = PathAttr.path
+ 		
+		self.RequestAttr = Namespace(method = mthd, abs_path = abspth, rel_path = relpth, headers = headers)
 
-		PathAttr = parse.urlparse(self.RequestAttr['abs_path'])
-
-		self.RequestAttr['rel_path'] = PathAttr.path
-
-		self.filepath = self.BaseDir + self.RequestAttr['rel_path']
+		self.filepath = self.BaseDir + self.RequestAttr.rel_path
 
 
 	def ValidateRequest(self):
 
-		if self.RequestAttr['method'] not in self.SupportedMethods.keys():
+		if self.RequestAttr.method not in self.SupportedMethods.keys():
+			self.send_error('400')
+			return False
+
+		# HTTP 1.1 compliant 
+		if 'Host' not in self.RequestAttr.headers.keys():
 			self.send_error('400')
 			return False
 
@@ -102,7 +116,7 @@ class ResponseHandler():
 			if not self.filepath.endswith('/'):
 
 				self.send_response('301')
-				self.SendHeader("Location", self.RequestAttr['rel_path'] + "/")
+				self.SendHeader("Location", self.RequestAttr.rel_path + "/")
 				self.EndHeaders()
 				return False
 
@@ -162,7 +176,7 @@ class ResponseHandler():
 
 		if self.ValidateRequest():
 		
-			self.SupportedMethods[self.RequestAttr['method']](self)
+			self.SupportedMethods[self.RequestAttr.method](self)
 
 
 

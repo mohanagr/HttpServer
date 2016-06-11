@@ -33,7 +33,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler
 	def handle(self):
 		data = self.request.recv(1024)
 		print(data.decode('utf-8'))
-		response.ResponseHandler(self.request, data, args.dir)
+		response.ResponseHandler.__init__(self, data, args.dir)
 
 
 if __name__ == "__main__":
