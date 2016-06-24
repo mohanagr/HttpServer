@@ -33,7 +33,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler
 
 	def handle(self):
 
-		self.request.settimeout(0.1) # Because recv() is blocking
+		self.request.settimeout(1) # Because recv() is blocking
 		data = b''
 		while True:
 			try:
@@ -52,7 +52,7 @@ class MyRequestHandler(socketserver.BaseRequestHandler, response.ResponseHandler
 					sys.exit(0)
 				else:
 					data = data + msg
-		print(data)
+		print(data.decode('utf-8'))
 		response.ResponseHandler(self.request, data, args.dir)
 
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 		sys.exit()
 
 	try:
-		print("Server starting . . .\n")
+		print("Server starting . . .")
 		server.serve_forever()
 	except KeyboardInterrupt :
 		print("\nServer shut down.")
