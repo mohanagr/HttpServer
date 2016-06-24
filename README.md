@@ -1,5 +1,5 @@
 # HttpServer
-HTTP server that serves static webpages. Meant as a learning exercise.
+HTTP server that supports dynamic PHP pages and serves static files/pages as well. Meant as a learning exercise.
 
 ## Usage
 * Clone this repository and `cd` to it
@@ -16,6 +16,6 @@ HTTP server that serves static webpages. Meant as a learning exercise.
 * The server will correctly only on UNIX based operating systems.
 
 ## Features
-* Supports `GET` and `HEAD` requests
-* Implements look up for `index.html` / `index.htm` in a directory
-
+* Supports PHP scripts in order to generate dynamic web content (via CGI as of now)
+* Supports `POST`, `GET` and `HEAD` requests
+* Implements look up for `index.php` / `index.html` in a directory
