@@ -213,7 +213,11 @@ class ResponseHandler():
 			ctype = mimetypes.guess_type(self.filepath)[0]
 			if ctype:
 				self.SendHeader('Content-Type', ctype)
+			else:
+				# Default Content-Type is mimetype guess fails
+				self.SendHeader('Content-Type', 'application/octet-stream')
 			self.SendHeader('Content-Length', str(fd[6]))
+			self.SendHeader('Last-Modified', formatdate(timeval=fd[8], localtime=False, usegmt=True))
 		else:
 
 			# Set the remaining environment variables necessary to execute PHP
@@ -248,7 +252,7 @@ class ResponseHandler():
 		if self.environ['REQUEST_METHOD'] == 'POST' :
 			cmd = 'echo "{}"'.format(data) + ' | ' + cmd
 
-		p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True, env=self.environ)
+		p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, env=self.environ)
 
 		buff = p.stdout.read()
 
