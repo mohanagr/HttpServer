@@ -22,7 +22,7 @@
       <h1>
 <a id="httpserver" class="anchor" href="#httpserver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HttpServer</h1>
 
-<p>HTTP server that serves static webpages. Meant as a learning exercise.</p>
+<p>HTTP server that supports dynamic PHP pages and serves static files/pages as well. Meant as a learning exercise.</p>
 
 <h2>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
@@ -65,14 +65,16 @@
 <li>Test it using any web browser - <code>http://127.0.0.1:[PORT]</code>
 </li>
 <li>Care should be taken if no port is specified. It is possible some other service might be using HTTP port 80 (eg. Apache)</li>
+<li>The server will correctly only on UNIX based operating systems.</li>
 </ul>
 
 <h2>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
 
 <ul>
-<li>Supports <code>GET</code> and <code>HEAD</code> requests</li>
-<li>Implements look up for <code>index.html</code> / <code>index.htm</code> in a directory</li>
+<li>Supports PHP scripts in order to generate dynamic web content (via CGI as of now)</li>
+<li>Supports <code>POST</code>, <code>GET</code> and <code>HEAD</code> requests</li>
+<li>Implements look up for <code>index.php</code> / <code>index.html</code> in a directory</li>
 </ul>
 
       <footer class="site-footer">
