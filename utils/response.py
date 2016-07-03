@@ -10,7 +10,7 @@ import subprocess
 
 class ResponseHandler():
 
-	StatusMapping = {'404' : 'Not Found', '400' : 'Bad Request', '200' : 'OK', '301' : 'Moved Permanently'}
+	StatusMapping = {'404' : 'Not Found', '400' : 'Bad Request', '200' : 'OK', '301' : 'Moved Permanently', '500' : 'Internal Sever Error'}
 
 	ErrorTemplate = Template('''
 		<html>
