@@ -5,8 +5,10 @@ from string import Template
 from argparse import Namespace
 import mimetypes
 import os
+import sys
 import socket
 import subprocess
+import time
 
 class ResponseHandler():
 
@@ -203,7 +205,7 @@ class ResponseHandler():
 
 		self.send_response('200')
 
-		print('RESPONSE SENT')
+		print('[DEBUG] Response Sent : \n')
 
 		if not self.file_is_script:
 
@@ -247,14 +249,10 @@ class ResponseHandler():
 
 		data = self.RequestAttr.payload
 
-		cmd = script + ' -q ' + self.filepath
+		p1 = subprocess.Popen(['/bin/echo', ' "{}"'.format(data)], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+		p2 = subprocess.Popen([script, '-q', self.filepath], stdout=subprocess.PIPE, stdin=p1.stdout, env=self.environ)
 
-		if self.environ['REQUEST_METHOD'] == 'POST' :
-			cmd = 'echo "{}"'.format(data) + ' | ' + cmd
-
-		p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, env=self.environ)
-
-		buff = p.stdout.read()
+		buff = p2.stdout.read()
 
 		dat = buff.decode('utf-8')
 
@@ -266,8 +264,6 @@ class ResponseHandler():
 		self.SendHeader('Content-Length', str(len(dat)))
 		self.EndHeaders()
 		self.SendBody()
-		
-		#print(buff.decode('utf-8'))
 
 
 	def is_php(self):
@@ -329,7 +325,7 @@ class ResponseHandler():
 	def do_POST(self):
 		fobj = self.respond()
 
-		if fobj:
+		if fobj:	
 			if self.file_is_script:
 				self.exec_php()
 			else:
